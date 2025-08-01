@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.commands.DepositCommand;
 import org.example.commands.TransferCommand;
+import org.example.exception.AccountNotFoundException;
 import org.example.models.Account;
 import org.example.models.Bank;
 import org.example.service.BankService;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Unit test for simple App.
@@ -77,5 +79,13 @@ public class AppTest
         bankService.executeCommand(new TransferCommand(acc1, acc2, transferAmount));
         assertEquals(acc1CurrentBalance, acc1.getBalance(), "Balance mismatch after failed transfer");
 
+    }
+
+    @Test
+    public void testGetAccountId_ThrowsExceptionForInvalidId() {
+        AccountNotFoundException accountNotFoundException = assertThrows(AccountNotFoundException.class, () -> {
+            bankService.getAccountById(bank.getAccounts(), 9999);
+        });
+        assertEquals("Account ID 9999 not found", accountNotFoundException.getMessage());
     }
 }
