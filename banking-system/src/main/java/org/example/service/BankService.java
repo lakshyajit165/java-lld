@@ -4,7 +4,9 @@ import org.example.commands.Command;
 import org.example.exception.AccountNotFoundException;
 import org.example.models.Account;
 import org.example.models.Transaction;
+import org.example.utils.TransactionDateComparator;
 
+import java.util.Collections;
 import java.util.List;
 
 public class BankService {
@@ -38,7 +40,11 @@ public class BankService {
         if(filteredAccounts.isEmpty()) {
             throw new AccountNotFoundException("Account ID " + accountId + " not found");
         }
-        return filteredAccounts.getFirst().getTransactions();
+        // sort the transactions in the desc order of created date by default
+        List<Transaction> transactions = filteredAccounts.getFirst().getTransactions();
+        Collections.sort(transactions, new TransactionDateComparator());
+        return transactions;
     }
+
 
 }

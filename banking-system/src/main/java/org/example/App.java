@@ -17,19 +17,19 @@ import java.util.List;
  */
 public class App 
 {
-    public static void main( String[] args )
-    {
+    public static void main( String[] args ) throws InterruptedException {
         Bank bank = new Bank();
         BankService bankService = new BankService();
 
         bankService.executeCommand(new CreateAccountCommand(bank, 1, 5000));
+        Thread.sleep(2000); // simulating delay
         bankService.executeCommand(new CreateAccountCommand(bank, 2, 10000));
-
+        Thread.sleep(1000); // simulating delay
         try {
             bankService.executeCommand(new DepositCommand(
                     bankService.getAccountById(bank.getAccounts(), 1), 15000
             ));
-
+            Thread.sleep(3000); // simulating delay
             bankService.executeCommand(new TransferCommand(
                     bankService.getAccountById(bank.getAccounts(), 1),
                     bankService.getAccountById(bank.getAccounts(), 2),
@@ -41,7 +41,7 @@ public class App
                 System.out.println("Transactions for account: " + acc.getId());
                 List<Transaction> transactions = bankService.getAllAccountTransactions(bank.getAccounts(), acc.getId());
                 for(Transaction txn : transactions) {
-                    System.out.print("id: " + txn.getId() + " type: " + txn.getTransactionType() + " amount: $" + txn.getAmount() + " | ");
+                    System.out.print("id: " + txn.getId() + " created at: " + txn.getCreatedAt() + " type: " + txn.getTransactionType() + " amount: $" + txn.getAmount() + " | ");
                 }
                 System.out.println();
 
