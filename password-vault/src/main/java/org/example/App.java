@@ -1,5 +1,8 @@
 package org.example;
 
+import org.example.model.PasswordEntry;
+import sun.security.util.Password;
+
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
@@ -27,10 +30,8 @@ public class App
     private static final String ENCRYPTION_ALGORITHM = "AES/CBC/PKCS5Padding";
     private static final int ITERATIONS = 65536;
     private static final int KEY_LENGTH = 256;
-    private static final HashMap<String, String> passwordList = new HashMap<>();
-    // Salt and IV (should be securely stored and transmitted)
-    private static final byte[] salt = generateRandomBytes(16);
-    private static final byte[] iv = generateRandomBytes(16);
+    private static final HashMap<String, PasswordEntry> passwordList = new HashMap<>();
+
     private static String masterPassword;
 
     // Generate secret key from master password
@@ -93,8 +94,12 @@ public class App
         System.out.println("Enter password:");
         String plainText = br.readLine();
 
-        String encrypted = encrypt(plainText, inputMasterPassword, salt, iv);
-        passwordList.put(platform.toLowerCase(), encrypted);
+        // Generate a fresh salt and IV for this entry
+        byte[] entrySalt = generateRandomBytes(16); // 16 bytes is fine for salt
+        byte[] entryIv = generateRandomBytes(16);   // 16 bytes for AES-CBC IV
+
+        String encrypted = encrypt(plainText, inputMasterPassword, entrySalt, entryIv);
+        passwordList.put(platform.toLowerCase(), new PasswordEntry(encrypted, entrySalt, entryIv));
         System.out.println("Added password for " + platform);
     }
 
@@ -112,11 +117,12 @@ public class App
         }
         System.out.println("Enter platform:");
         String platform = br.readLine();
-        if(!passwordList.containsKey(platform.toLowerCase())) {
+        PasswordEntry passwordEntry = passwordList.get(platform.toLowerCase());
+        if(passwordEntry == null) {
             System.out.println("Password for platform " + platform + " not yet created");
             return;
         }
-        String decrypted = decrypt(passwordList.get(platform.toLowerCase()), masterPassword, salt, iv);
+        String decrypted = decrypt(passwordEntry.getCipherText(), masterPassword, passwordEntry.getSalt(), passwordEntry.getIv());
         System.out.println("Decrypted password: " + decrypted);
     }
     public static void main( String[] args ) throws IOException {
